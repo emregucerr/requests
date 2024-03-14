@@ -109,6 +109,9 @@ class RequestEncodingMixin(object):
                          v.encode('utf-8') if isinstance(v, str) else v))
 
         for (k, v) in files:
+            # Encode field name if it's a string
+            if isinstance(k, str):
+                k = k.encode('utf-8')
             # support for explicit filename
             ft = None
             if isinstance(v, (tuple, list)):
@@ -119,6 +122,11 @@ class RequestEncodingMixin(object):
             else:
                 fn = guess_filename(v) or k
                 fp = v
+
+            # Encode file name if it's a string
+            if isinstance(fn, str):
+                fn = fn.encode('utf-8')
+
             if isinstance(fp, str):
                 fp = StringIO(fp)
             if isinstance(fp, bytes):
