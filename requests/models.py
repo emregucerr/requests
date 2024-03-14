@@ -106,6 +106,9 @@ class RequestEncodingMixin(object):
                 val = [val]
             for v in val:
                 if v is not None:
+                    # Coerce non-string values to string
+                    if not isinstance(v, basestring):
+                        v = str(v)
                     new_fields.append(
                         (field.decode('utf-8') if isinstance(field, bytes) else field,
                          v.encode('utf-8') if isinstance(v, str) else v))
