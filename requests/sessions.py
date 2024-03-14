@@ -376,14 +376,16 @@ class Session(SessionRedirectMixin):
         return r
 
     def get_adapter(self, url):
-        """Returns the appropriate connnection adapter for the given URL."""
-        for (prefix, adapter) in self.adapters.items():
-
-            if url.startswith(prefix):
-                return adapter
-
-        # Nothing matches :-/
-        raise InvalidSchema("No connection adapters were found for '%s'" % url)
+        """Returns the appropriate connection adapter for the given URL."""
+        best_match = ''
+        best_adapter = None
+        for prefix, adapter in self.adapters.items():
+            if url.startswith(prefix) and len(prefix) > len(best_match):
+                best_match = prefix
+                best_adapter = adapter
+        if best_adapter is not None:
+            return best_adapter
+        raise InvalidSchema(f"No connection adapters were found for '{url}'")
 
     def close(self):
         """Closes all adapters and as such the session"""
@@ -393,13 +395,10 @@ class Session(SessionRedirectMixin):
     def mount(self, prefix, adapter):
         """Registers a connection adapter to a prefix."""
         self.adapters[prefix] = adapter
+        self.adapters = {
+            k: v for k, v in sorted(self.adapters.items(), key=lambda i: (-len(i[0]), i[0]))
+        }
 
-    def __getstate__(self):
-        return dict((attr, getattr(self, attr, None)) for attr in self.__attrs__)
-
-    def __setstate__(self, state):
-        for attr, value in state.items():
-            setattr(self, attr, value)
 
 
 def session():
