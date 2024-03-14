@@ -50,26 +50,25 @@ class CaseInsensitiveDict(dict):
             self._lower_keys.clear()
 
     def __setitem__(self, key, value):
-        dict.__setitem__(self, key, value)
+        lower_key = key.lower()
+        existing_key = self.lower_keys.get(lower_key)
+        if existing_key is not None:
+            dict.__delitem__(self, existing_key)
+        dict.__setitem__(self, lower_key, value)
         self._clear_lower_keys()
 
     def __delitem__(self, key):
-        dict.__delitem__(self, self.lower_keys.get(key.lower(), key))
-        self._lower_keys.clear()
+        dict.__delitem__(self, key.lower())
+        self._clear_lower_keys()
 
     def __contains__(self, key):
-        return key.lower() in self.lower_keys
+        return key.lower() in self.lower_keys()
 
     def __getitem__(self, key):
-        # We allow fall-through here, so values default to None
-        if key in self:
-            return dict.__getitem__(self, self.lower_keys[key.lower()])
+        return dict.__getitem__(self, key.lower())
 
     def get(self, key, default=None):
-        if key in self:
-            return self[key]
-        else:
-            return default
+        return dict.get(self, key.lower(), default)
 
 
 class LookupDict(dict):
