@@ -328,6 +328,9 @@ class PreparedRequest(RequestEncodingMixin, RequestHooksMixin):
             self.headers = CaseInsensitiveDict(headers)
         else:
             self.headers = CaseInsensitiveDict()
+        # Remove 'Content-Length' header for GET requests with no body
+        if self.method is not None and self.method.upper() == 'GET' and not self.body:
+            self.headers.pop('Content-Length', None)
 
     def prepare_body(self, data, files):
         """Prepares the given HTTP body data."""
@@ -383,6 +386,11 @@ class PreparedRequest(RequestEncodingMixin, RequestHooksMixin):
             if (content_type) and (not 'content-type' in self.headers):
                 self.headers['Content-Type'] = content_type
 
+            # Set 'Content-Length' only if the method is not 'GET' or there is a body
+            if not (self.method.upper() == 'GET' and not body):
+                self.prepare_content_length(body)
+
+        self.body = body
         self.body = body
 
     def prepare_content_length(self, body):
