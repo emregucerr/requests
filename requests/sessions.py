@@ -145,6 +145,10 @@ class SessionRedirectMixin(object):
             )
 
             extract_cookies_to_jar(self.cookies, prepared_request, resp.raw)
+            if req.cookies:
+                for cookie_name, cookie_value in req.cookies.items():
+                    self.cookies.set(cookie_name, cookie_value)
+            prepared_request.prepare_cookies(self.cookies)
 
             i += 1
             yield resp
@@ -428,6 +432,8 @@ class Session(SessionRedirectMixin):
         return self.request('DELETE', url, **kwargs)
 
     def send(self, request, **kwargs):
+        # Make sure cookies are updated on the request headers
+        request.prepare_cookies(self.cookies)
         """Send a given PreparedRequest."""
         # Set defaults that the hooks can utilize to ensure they always have
         # the correct parameters to reproduce the previous request.
