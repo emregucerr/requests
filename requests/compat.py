@@ -113,3 +113,13 @@ elif is_py3:
     bytes = bytes
     basestring = (str, bytes)
     numeric_types = (int, float)
+
+    def force_str(s, encoding='utf-8', errors='strict'):
+        """
+        Force a value to a native string.
+        """
+        if is_py2 and isinstance(s, unicode):
+            return s.encode(encoding, errors)
+        elif is_py3 and isinstance(s, bytes):
+            return s.decode(encoding, errors)
+        return str(s)
