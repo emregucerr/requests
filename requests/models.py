@@ -732,3 +732,14 @@ class Response(object):
         *Note: Should not normally need to be called explicitly.*
         """
         return self.raw.release_conn()
+
+    def __getstate__(self):
+        state = self.__dict__.copy()
+        # Exclude the unpicklable entries.
+        state.pop('raw', None)
+        return state
+
+    def __setstate__(self, state):
+        self.__dict__.update(state)
+        # Restore the unpicklable 'raw' attribute to a default value.
+        self.raw = None

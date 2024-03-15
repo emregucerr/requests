@@ -566,6 +566,30 @@ class RequestsTestCase(unittest.TestCase):
         assert str(error) == 'message'
         assert error.response == response
 
+    def test_response_pickling(self):
+        # Make a request to a URL that will return a simple response.
+        response = requests.get(httpbin('get'))
+
+        # Pickle the response.
+        pickled_response = pickle.dumps(response)
+
+        # Unpickle the response.
+        unpickled_response = pickle.loads(pickled_response)
+
+        # Now assert that the pickled then unpickled response has the same
+        # attributes as the original response.
+        assert response.url == unpickled_response.url
+        assert response.status_code == unpickled_response.status_code
+        assert response.headers == unpickled_response.headers
+        assert response.content == unpickled_response.content
+        assert response.text == unpickled_response.text
+        assert response.encoding == unpickled_response.encoding
+        assert response.reason == unpickled_response.reason
+        assert response.cookies == unpickled_response.cookies
+        assert response.elapsed == unpickled_response.elapsed
+        assert response.request.method == unpickled_response.request.method
+        assert response.history == unpickled_response.history
+
     def test_session_pickling(self):
         r = requests.Request('GET', httpbin('get'))
         s = requests.Session()
