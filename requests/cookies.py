@@ -8,7 +8,7 @@ requests.utils imports from here, so be careful with imports.
 
 import time
 import collections
-from .compat import cookielib, urlparse, Morsel
+from .compat import cookielib, CookieJar, urlparse, Morsel
 
 try:
     import threading
