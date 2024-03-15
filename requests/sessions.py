@@ -323,8 +323,9 @@ class Session(SessionRedirectMixin):
         )
         prep = self.prepare_request(req)
 
-        # Add param cookies to session cookies
-        self.cookies = cookiejar_from_dict(cookies, cookiejar=self.cookies, overwrite=False)
+        # Ensure cookies are handled using the updated cookiejar_from_dict function.
+        if cookies is not None:
+            self.cookies = cookiejar_from_dict(cookies, cookiejar=self.cookies, overwrite=False)
 
         proxies = proxies or {}
 
@@ -348,6 +349,9 @@ class Session(SessionRedirectMixin):
         stream = merge_setting(stream, self.stream)
         verify = merge_setting(verify, self.verify)
         cert = merge_setting(cert, self.cert)
+
+        # Use the updated cookies value for sending the request
+        send_kwargs['cookies'] = cookies
 
         # Send the request.
         send_kwargs = {
