@@ -313,6 +313,8 @@ class Session(SessionRedirectMixin):
         method = builtin_str(method)
 
         # Create the Request.
+        # Preserve the session's original cookies
+        original_session_cookies = self.cookies.copy()
         req = Request(
             method = method.upper(),
             url = url,
@@ -324,7 +326,8 @@ class Session(SessionRedirectMixin):
             cookies = cookies,
             hooks = hooks,
         )
-        prep = self.prepare_request(req)
+        # Prepare the request with a merged cookies collection
+        prep = self.prepare_request(req, cookies=original_session_cookies)
 
         # Add param cookies to session cookies
         self.cookies = cookiejar_from_dict(cookies, cookiejar=self.cookies, overwrite=False)
@@ -352,6 +355,8 @@ class Session(SessionRedirectMixin):
         verify = merge_setting(verify, self.verify)
         cert = merge_setting(cert, self.cert)
 
+        # Set merged request cookies
+        merged_cookies = prep._cookies
         # Send the request.
         send_kwargs = {
             'stream': stream,
@@ -360,8 +365,12 @@ class Session(SessionRedirectMixin):
             'cert': cert,
             'proxies': proxies,
             'allow_redirects': allow_redirects,
+            'cookies': merged_cookies,  # Use the prepared request's cookies
         }
         resp = self.send(prep, **send_kwargs)
+
+        # After the request, restore the session's original cookies
+        self.cookies = original_session_cookies
 
         return resp
 
