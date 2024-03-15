@@ -2844,3 +2844,15 @@ def test_json_decode_errors_are_serializable_deserializable():
     )
     deserialized_error = pickle.loads(pickle.dumps(json_decode_error))
     assert repr(json_decode_error) == repr(deserialized_error)
+def test_unicode_method_handling(httpbin):
+    files = {u'file': open(u'/usr/bin/diff', u'rb')}
+    # Using 'POST' as a byte string
+    response = requests.request(method=b'POST', url=httpbin('post'), files=files)
+    assert response.status_code == 200
+    assert response.request.method == 'POST'
+
+    # Using 'POST' as a unicode string
+    response = requests.request(method=u'POST', url=httpbin('post'), files=files)
+    assert response.status_code == 200
+    assert response.request.method == 'POST'
+    files[u'file'].close()

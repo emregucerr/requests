@@ -392,9 +392,10 @@ class PreparedRequest(RequestEncodingMixin, RequestHooksMixin):
 
     def prepare_method(self, method):
         """Prepares the given HTTP method."""
-        self.method = method
-        if self.method is not None:
-            self.method = to_native_string(self.method.upper())
+        if isinstance(method, builtin_str):
+            # Ensure method is ascii encoded bytes string
+            method = method.encode('ascii')
+        self.method = method.upper() if method is not None else None
 
     @staticmethod
     def _get_idna_encoded_host(host):

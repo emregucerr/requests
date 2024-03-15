@@ -560,8 +560,9 @@ class Session(SessionRedirectMixin):
         :rtype: requests.Response
         """
         # Create the Request.
+        method = to_native_string(method.upper())
         req = Request(
-            method=method.upper(),
+            method=method,
             url=url,
             headers=headers,
             files=files,
