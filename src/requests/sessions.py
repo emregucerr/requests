@@ -175,7 +175,6 @@ class SessionRedirectMixin:
         url = self.get_redirect_target(resp)
         previous_fragment = urlparse(req.url).fragment
         while url:
-            prepared_request = req.copy()
 
             # Update history and keep track of redirects.
             # resp.history must ignore the original request in this loop
@@ -216,7 +215,7 @@ class SessionRedirectMixin:
             else:
                 url = requote_uri(url)
 
-            prepared_request.url = to_native_string(url)
+            req.url = to_native_string(url)
 
             self.rebuild_method(prepared_request, resp)
 
@@ -228,8 +227,8 @@ class SessionRedirectMixin:
                 # https://github.com/psf/requests/issues/3490
                 purged_headers = ("Content-Length", "Content-Type", "Transfer-Encoding")
                 for header in purged_headers:
-                    prepared_request.headers.pop(header, None)
-                prepared_request.body = None
+                    req.headers.pop(header, None)
+                req.body = None
 
             headers = prepared_request.headers
             headers.pop("Cookie", None)
@@ -237,7 +236,7 @@ class SessionRedirectMixin:
             # Extract any cookies sent on the response to the cookiejar
             # in the new request. Because we've mutated our copied prepared
             # request, use the old one that we haven't yet touched.
-            extract_cookies_to_jar(prepared_request._cookies, req, resp.raw)
+            extract_cookies_to_jar(req._cookies, req, resp.raw)
             merge_cookies(prepared_request._cookies, self.cookies)
             prepared_request.prepare_cookies(prepared_request._cookies)
 
@@ -350,7 +349,7 @@ class SessionRedirectMixin:
         if response.status_code == codes.moved and method == "POST":
             method = "GET"
 
-        prepared_request.method = method
+        req.method = method
 
 
 class Session(SessionRedirectMixin):
